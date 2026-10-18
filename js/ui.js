@@ -55,7 +55,26 @@ function drawPassenger(p, x, y, r, selected) {
   textAlign(CENTER, CENTER);
   textSize(r * 1.05);
   textStyle(BOLD);
-  text(p.id, x, y + 1);
+  text(p.initial, x, y + 1);
   textStyle(NORMAL);
-  addHit({ x, y, r: r + 4 }, () => selectPassenger(p.id));
+  addHit({ x, y, r: r + 4, tooltip: p.name }, () => selectPassenger(p.id));
+}
+
+// Подпись с именем над кружком под курсором
+function drawTooltip(h) {
+  if (!h || !h.tooltip) return;
+  textSize(12);
+  textStyle(BOLD);
+  const w = textWidth(h.tooltip) + 16;
+  const x = constrain(h.x - w / 2, 4, width - w - 4);
+  const y = h.y - h.r - 28;
+  noStroke();
+  shadow(COLORS.shadow, 8, 2);
+  fill(COLORS.panel);
+  rect(x, y, w, 22, 6);
+  noShadow();
+  fill(COLORS.panelText);
+  textAlign(CENTER, CENTER);
+  text(h.tooltip, x + w / 2, y + 11);
+  textStyle(NORMAL);
 }

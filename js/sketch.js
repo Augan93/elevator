@@ -16,10 +16,10 @@ function resetSimulation() {
   input.value = n;
 
   elevator = new Elevator(CFG.FLOORS, serveFloor);
-  passengers = [];
-  for (let i = 0; i < n; i++) {
-    passengers.push(new Passenger(i + 1, Math.floor(random(CFG.FLOORS)), PASSENGER_COLORS[i]));
-  }
+  const names = pickNames(n);
+  passengers = names.map(
+    (name, i) => new Passenger(i + 1, name, Math.floor(random(CFG.FLOORS)), PASSENGER_COLORS[i])
+  );
   selectedId = passengers[0].id;
   message = null;
 }
@@ -35,7 +35,9 @@ function draw() {
   drawBuilding(elevator, passengers, selectedId);
   drawPanel(elevator, passengers, selectedId, currentHint());
 
-  cursor(hitAt(mouseX, mouseY) ? HAND : ARROW);
+  const hovered = hitAt(mouseX, mouseY);
+  drawTooltip(hovered);
+  cursor(hovered ? HAND : ARROW);
 }
 
 function mousePressed() {
@@ -61,11 +63,11 @@ function say(text) {
 function onHallButton(floor, dir) {
   const p = selectedPassenger();
   if (!p) return say('Сначала выберите пассажира.');
-  if (p.state === P_STATE.RIDING) return say(`#${p.id} уже в кабине — выберите этаж на панели.`);
-  if (p.floor !== floor) return say(`#${p.id} находится на ${p.floor + 1} этаже — вызывайте лифт оттуда.`);
+  if (p.state === P_STATE.RIDING) return say(`${p.name} уже в кабине — выберите этаж на панели.`);
+  if (p.floor !== floor) return say(`${p.name} сейчас на ${p.floor + 1} этаже — вызывайте лифт оттуда.`);
   if (p.state === P_STATE.WAITING) {
-    if (p.dir === dir) return say(`#${p.id} уже вызвал лифт.`);
-    releaseHallCall(p); // передумал ехать в другую сторону
+    if (p.dir === dir) return say(`Вызов уже есть — ${p.name} ждёт лифт.`);
+    releaseHallCall(p); // пассажир решил ехать в другую сторону
   }
 
   p.state = P_STATE.WAITING;
@@ -109,7 +111,7 @@ function serveFloor(floor, dir) {
       p.state = P_STATE.RIDING;
       p.target = null;
       changed = true;
-      if (p.id === selectedId) say(`#${p.id} вошёл в кабину — нажмите нужный этаж на панели.`);
+      if (p.id === selectedId) say(`${p.name} в кабине — нажмите нужный этаж на панели.`);
     }
   }
   return changed;
@@ -122,12 +124,12 @@ function currentHint() {
   if (!p) return 'Выберите пассажира: кликните по кружку на этаже или в списке.';
   switch (p.state) {
     case P_STATE.IDLE:
-      return `#${p.id} на ${p.floor + 1} этаже. Нажмите ▲ или ▼ на его этаже, чтобы вызвать лифт.`;
+      return `${p.name} на ${p.floor + 1} этаже. Нажмите ▲ или ▼ на этом этаже, чтобы вызвать лифт.`;
     case P_STATE.WAITING:
-      return `#${p.id} ждёт лифт на ${p.floor + 1} этаже.`;
+      return `${p.name} ждёт лифт на ${p.floor + 1} этаже.`;
     default:
       return p.target === null
-        ? `#${p.id} в кабине. Нажмите нужный этаж на панели.`
-        : `#${p.id} едет на ${p.target + 1} этаж.`;
+        ? `${p.name} в кабине. Нажмите нужный этаж на панели.`
+        : `${p.name} едет на ${p.target + 1} этаж.`;
   }
 }

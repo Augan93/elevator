@@ -29,7 +29,7 @@ function drawPanel(elevator, passengers, selectedId, hintText) {
   drawFloorButtons(elevator, x0, top + 162);
   drawDoorButtons(x0 + 20, top + 540);
   drawPassengerList(passengers, selectedId, x0 + 226, top + 44);
-  drawHint(hintText, x0 + 226, top + 44 + passengers.length * 38 + 10);
+  drawHint(hintText, x0 + 226, top + 44 + passengers.length * LIST_ROW_STEP + 10);
 }
 
 function drawSectionTitle(label, x, y) {
@@ -115,10 +115,13 @@ function drawDoorButtons(x, y) {
   text('закрыть', x + 130, y + 54);
 }
 
+const LIST_ROW_STEP = 46;
+
 function drawPassengerList(passengers, selectedId, x, y) {
   const w = 184;
+  const h = LIST_ROW_STEP - 6;
   passengers.forEach((p, i) => {
-    const ry = y + i * 38;
+    const ry = y + i * LIST_ROW_STEP;
     const selected = p.id === selectedId;
 
     if (selected) {
@@ -128,15 +131,20 @@ function drawPassengerList(passengers, selectedId, x, y) {
       noStroke();
     }
     fill(selected ? COLORS.panelBtn : COLORS.panelCard);
-    rect(x, ry, w, 32, 8);
+    rect(x, ry, w, h, 8);
 
-    drawPassenger(p, x + 18, ry + 16, 10, false);
+    drawPassenger(p, x + 20, ry + h / 2, 11, false);
     noStroke();
-    fill(COLORS.panelText);
     textAlign(LEFT, CENTER);
-    textSize(12.5);
-    text(p.describe(), x + 36, ry + 16);
-    addHit({ x, y: ry, w, h: 32 }, () => selectPassenger(p.id));
+    fill(COLORS.panelText);
+    textSize(13);
+    textStyle(BOLD);
+    text(p.name, x + 40, ry + 13);
+    textStyle(NORMAL);
+    fill(COLORS.panelMuted);
+    textSize(11.5);
+    text(p.describe(), x + 40, ry + 28);
+    addHit({ x, y: ry, w, h }, () => selectPassenger(p.id));
   });
 }
 
