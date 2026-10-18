@@ -27,10 +27,26 @@ function drawBuilding(elevator, passengers, selectedId) {
 
     drawFloorLabel(f, top);
     drawHallButtons(f, top, elevator);
-    drawFloorPassengers(f, top, passengers, selectedId);
   }
 
   drawShaft(elevator, passengers, selectedId);
+
+  // Пассажиры на этажах и те, кто входит/выходит, — поверх шахты
+  for (const p of passengers) {
+    if (p.state !== P_STATE.RIDING) drawPassenger(p, p.id === selectedId);
+  }
+}
+
+// Где стоит i-й из n пассажиров на этаже f
+function floorSlot(f, i, n) {
+  const span = CFG.HALL_BTN_X - 40 - CFG.WAIT_X;
+  const step = n > 1 ? Math.min(34, span / (n - 1)) : 0;
+  return { x: CFG.WAIT_X + i * step, y: floorTopY(f) + CFG.FLOOR_H / 2 };
+}
+
+// Место i-го пассажира в кабине, которая сейчас на высоте pos
+function cabinSlot(i, pos) {
+  return { x: CFG.SHAFT_X + 16 + i * 17.5, y: floorTopY(pos) + CFG.FLOOR_H / 2 };
 }
 
 function drawFloorLabel(f, top) {
@@ -73,24 +89,6 @@ function drawHallButtons(f, top, elevator) {
   }
 }
 
-function drawFloorPassengers(f, top, passengers, selectedId) {
-  const here = passengers.filter(p => p.state !== P_STATE.RIDING && p.floor === f);
-  const y = top + CFG.FLOOR_H / 2;
-
-  here.forEach((p, i) => {
-    const x = CFG.WAIT_X + i * 34;
-    drawPassenger(p, x, y, 12, p.id === selectedId);
-    if (p.state === P_STATE.WAITING) {
-      // Значок «ждёт вверх/вниз»
-      noStroke();
-      fill(COLORS.lit);
-      circle(x + 11, y - 11, 13);
-      fill(COLORS.litText);
-      drawArrow(x + 11, y - 11, p.dir, 3);
-    }
-  });
-}
-
 function drawShaft(elevator, passengers, selectedId) {
   const { SHAFT_X, SHAFT_W, TOP, FLOORS, FLOOR_H } = CFG;
 
@@ -127,13 +125,9 @@ function drawCabin(elevator, passengers, selectedId, top) {
   fill(COLORS.cabinLight);
   rect(x + 10, top + 4, w - 20, 3, 2);
 
-  passengers
-    .filter(p => p.state === P_STATE.RIDING)
-    .forEach((p, i) => {
-      const cx = x + 11 + (i % 4) * 17.5;
-      const cy = top + 17 + Math.floor(i / 4) * 18;
-      drawPassenger(p, cx, cy, 7.5, p.id === selectedId);
-    });
+  for (const p of passengers) {
+    if (p.state === P_STATE.RIDING) drawPassenger(p, p.id === selectedId);
+  }
 
   // Двери разъезжаются в стороны; полупрозрачные — видно, кто внутри
   const half = ((w - 4) / 2) * (1 - elevator.door);

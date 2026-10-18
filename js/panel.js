@@ -6,8 +6,9 @@ const STATE_LABELS = {
   [STATE.CLOSING]: 'двери закрываются',
 };
 
-// Вид изнутри кабины: табло, кнопки этажей (2 столбца), двери; справа — пассажиры и подсказка
-function drawPanel(elevator, passengers, selectedId, hintText) {
+// Вид изнутри кабины: табло, кнопки этажей (2 столбца), двери;
+// справа — свои пассажиры, подсказка и статистика
+function drawPanel(elevator, passengers, selectedId, hintText, stats) {
   const x0 = CFG.PANEL_X;
   const top = CFG.TOP - 12;
   const h = CFG.FLOORS * CFG.FLOOR_H + 20;
@@ -28,8 +29,10 @@ function drawPanel(elevator, passengers, selectedId, hintText) {
   drawDisplay(elevator, x0 + 20, top + 44);
   drawFloorButtons(elevator, x0, top + 162);
   drawDoorButtons(x0 + 20, top + 540);
-  drawPassengerList(passengers, selectedId, x0 + 226, top + 44);
-  drawHint(hintText, x0 + 226, top + 44 + passengers.length * LIST_ROW_STEP + 10);
+  const own = passengers.filter(p => !p.auto);
+  drawPassengerList(own, selectedId, x0 + 226, top + 44);
+  drawHint(hintText, x0 + 226, top + 44 + own.length * LIST_ROW_STEP + 10);
+  drawStats(stats, x0 + 226, top + h - 16 - STATS_H);
 }
 
 function drawSectionTitle(label, x, y) {
@@ -57,9 +60,23 @@ function drawDisplay(elevator, x, y) {
   textStyle(NORMAL);
   noShadow();
 
-  fill(COLORS.panelMuted);
+  // Загрузка кабины
+  fill(elevator.full ? COLORS.displayText : COLORS.panelMuted);
+  textAlign(RIGHT, TOP);
+  textSize(11);
+  text(`${elevator.load}/${elevator.capacity}`, x + 162, y + 7);
+
+  textAlign(CENTER, CENTER);
   textSize(12);
-  text(STATE_LABELS[elevator.state], x + 85, y + 90);
+  if (elevator.overload) {
+    fill(COLORS.displayText);
+    textStyle(BOLD);
+    text('ПЕРЕГРУЗ', x + 85, y + 90);
+    textStyle(NORMAL);
+  } else {
+    fill(COLORS.panelMuted);
+    text(STATE_LABELS[elevator.state], x + 85, y + 90);
+  }
 }
 
 function drawFloorButtons(elevator, x0, y0) {
@@ -133,7 +150,7 @@ function drawPassengerList(passengers, selectedId, x, y) {
     fill(selected ? COLORS.panelBtn : COLORS.panelCard);
     rect(x, ry, w, h, 8);
 
-    drawPassenger(p, x + 20, ry + h / 2, 11, false);
+    drawAvatar(p, x + 20, ry + h / 2, 11, false);
     noStroke();
     textAlign(LEFT, CENTER);
     fill(COLORS.panelText);
@@ -150,7 +167,7 @@ function drawPassengerList(passengers, selectedId, x, y) {
 
 function drawHint(hintText, x, y) {
   const w = 184;
-  const h = 150;
+  const h = 124;
   noStroke();
   fill(COLORS.panelCard);
   rect(x, y, w, h, 8);
@@ -160,4 +177,32 @@ function drawHint(hintText, x, y) {
   textSize(13);
   textLeading(19);
   text(hintText, x + 12, y + 30, w - 24, h - 40);
+}
+
+const STATS_H = 96;
+
+function drawStats(stats, x, y) {
+  const w = 184;
+  noStroke();
+  fill(COLORS.panelCard);
+  rect(x, y, w, STATS_H, 8);
+  drawSectionTitle('Статистика', x + 12, y + 16);
+
+  const rows = [
+    ['Перевезено', String(stats.trips)],
+    ['Среднее ожидание', formatAverage(stats.waitSum, stats.waitCount)],
+    ['Средняя поездка', formatAverage(stats.rideSum, stats.trips)],
+  ];
+  textSize(12);
+  rows.forEach(([label, value], i) => {
+    const ry = y + 38 + i * 20;
+    fill(COLORS.panelMuted);
+    textAlign(LEFT, CENTER);
+    text(label, x + 12, ry);
+    fill(COLORS.panelText);
+    textAlign(RIGHT, CENTER);
+    textStyle(BOLD);
+    text(value, x + w - 12, ry);
+    textStyle(NORMAL);
+  });
 }

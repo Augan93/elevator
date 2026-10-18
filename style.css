@@ -44,6 +44,7 @@ body {
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   padding: 8px 8px 8px 16px;
@@ -54,7 +55,7 @@ body {
   color: #475569;
 }
 
-.controls input {
+.controls input[type="number"] {
   width: 56px;
   padding: 6px 8px;
   border: 1px solid #cbd5e1;
@@ -79,7 +80,38 @@ body {
   background: #1d4ed8;
 }
 
+.controls select {
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  color: #0f172a;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #2563eb;
+}
+
+.divider {
+  width: 1px;
+  height: 22px;
+  background: #e2e8f0;
+}
+
 .controls input:focus-visible,
+.controls select:focus-visible,
 .controls button:focus-visible {
   outline: 2px solid #93c5fd;
   outline-offset: 2px;

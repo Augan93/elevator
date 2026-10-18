@@ -35,7 +35,9 @@ function drawArrow(x, y, dir, size) {
   else triangle(x - s, y - s * 0.6, x + s, y - s * 0.6, x, y + s * 0.8);
 }
 
-function drawPassenger(p, x, y, r, selected) {
+// Кружок с первой буквой имени
+function drawAvatar(p, x, y, r, selected) {
+  drawingContext.globalAlpha = p.alpha;
   shadow(COLORS.shadow, 4, 1);
   stroke(255);
   strokeWeight(r > 9 ? 2 : 1.5);
@@ -57,7 +59,24 @@ function drawPassenger(p, x, y, r, selected) {
   textStyle(BOLD);
   text(p.initial, x, y + 1);
   textStyle(NORMAL);
-  addHit({ x, y, r: r + 4, tooltip: p.name }, () => selectPassenger(p.id));
+  drawingContext.globalAlpha = 1;
+}
+
+// Пассажир в здании или в кабине: своих можно выбрать кликом, у всех есть подпись при наведении
+function drawPassenger(p, selected) {
+  drawAvatar(p, p.x, p.y, p.r, selected);
+
+  if (p.state === P_STATE.WAITING) {
+    // Значок «ждёт вверх/вниз»
+    noStroke();
+    fill(COLORS.lit);
+    circle(p.x + 11, p.y - 11, 13);
+    fill(COLORS.litText);
+    drawArrow(p.x + 11, p.y - 11, p.dir, 3);
+  }
+
+  const tooltip = p.auto && p.plannedTarget !== null ? `${p.name} → ${p.plannedTarget + 1}` : p.name;
+  addHit({ x: p.x, y: p.y, r: p.r + 4, tooltip }, p.auto ? null : () => selectPassenger(p.id));
 }
 
 // Подпись с именем над кружком под курсором

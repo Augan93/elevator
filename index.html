@@ -18,6 +18,15 @@
         <label for="count">Пассажиров</label>
         <input id="count" type="number" min="1" max="8" value="3">
         <button id="reset" type="button">Создать заново</button>
+        <span class="divider"></span>
+        <label class="toggle"><input id="auto" type="checkbox"> Автопоток</label>
+        <select id="rate" aria-label="Интенсивность автопотока">
+          <option value="low">редко</option>
+          <option value="mid" selected>средне</option>
+          <option value="high">часто</option>
+        </select>
+        <span class="divider"></span>
+        <label class="toggle"><input id="sound" type="checkbox" checked> Звук</label>
       </div>
     </header>
     <main id="app" class="stage"></main>
@@ -26,6 +35,8 @@
   <script src="js/config.js"></script>
   <script src="js/elevator.js"></script>
   <script src="js/passenger.js"></script>
+  <script src="js/traffic.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/building.js"></script>
   <script src="js/panel.js"></script>
