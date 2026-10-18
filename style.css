@@ -1,0 +1,40 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #eef1f5;
+  color: #1f2937;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0 12px 0 0;
+}
+
+input {
+  width: 48px;
+  margin-left: 6px;
+  padding: 4px;
+  font: inherit;
+}
+
+button {
+  padding: 5px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+#app {
+  padding: 0 20px 20px;
+}
+
+canvas {
+  display: block;
+  border-radius: 8px;
+}
