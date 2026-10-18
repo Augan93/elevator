@@ -8,15 +8,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Лифт</h1>
-    <label>
-      Пассажиров
-      <input id="count" type="number" min="1" max="8" value="3">
-    </label>
-    <button id="reset">Создать заново</button>
-  </header>
-  <main id="app"></main>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Лифт</h1>
+        <p>12 этажей · один лифт · алгоритм LOOK</p>
+      </div>
+      <div class="controls">
+        <label for="count">Пассажиров</label>
+        <input id="count" type="number" min="1" max="8" value="3">
+        <button id="reset" type="button">Создать заново</button>
+      </div>
+    </header>
+    <main id="app" class="stage"></main>
+  </div>
 
   <script src="js/config.js"></script>
   <script src="js/elevator.js"></script>

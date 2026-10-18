@@ -1,40 +1,95 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #eef1f5;
-  color: #1f2937;
-}
-
-header {
+  min-height: 100vh;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 20px;
+  justify-content: center;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #f1f5f9, #dfe5ee);
+  color: #0f172a;
 }
 
-h1 {
-  font-size: 20px;
-  margin: 0 12px 0 0;
+.page {
+  width: 100%;
+  max-width: 1032px;
+  padding: 24px 16px;
 }
 
-input {
-  width: 48px;
-  margin-left: 6px;
-  padding: 4px;
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 16px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.brand p {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  font-size: 14px;
+  color: #475569;
+}
+
+.controls input {
+  width: 56px;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
   font: inherit;
+  color: #0f172a;
+  text-align: center;
 }
 
-button {
-  padding: 5px 12px;
+.controls button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
 }
 
-#app {
-  padding: 0 20px 20px;
+.controls button:hover {
+  background: #1d4ed8;
 }
 
-canvas {
+.controls input:focus-visible,
+.controls button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+/* p5 задаёт размеры холста инлайн-стилями — масштабируем под ширину страницы */
+.stage canvas {
   display: block;
-  border-radius: 8px;
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08);
 }

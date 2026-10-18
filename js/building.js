@@ -1,91 +1,149 @@
 function drawBuilding(elevator, passengers, selectedId) {
-  const { FLOORS, FLOOR_H, BUILDING_X, BUILDING_W, SHAFT_X, SHAFT_W, TOP } = CFG;
+  const { FLOORS, FLOOR_H, BUILDING_X, BUILDING_W, TOP } = CFG;
+  const height = FLOORS * FLOOR_H;
 
+  // Крыша, фасад и фундамент
   noStroke();
-  fill(COLORS.wall);
-  rect(BUILDING_X, TOP, BUILDING_W, FLOORS * FLOOR_H, 6);
-  fill(COLORS.shaft);
-  rect(SHAFT_X, TOP, SHAFT_W, FLOORS * FLOOR_H);
+  shadow(COLORS.shadow, 16, 4);
+  fill(COLORS.facade);
+  rect(BUILDING_X, TOP, BUILDING_W, height);
+  noShadow();
+  fill(COLORS.roof);
+  rect(BUILDING_X - 6, TOP - 12, BUILDING_W + 12, 12, 4, 4, 0, 0);
+  fill(COLORS.ground);
+  rect(BUILDING_X - 6, TOP + height, BUILDING_W + 12, 8, 0, 0, 4, 4);
 
   for (let f = 0; f < FLOORS; f++) {
     const top = floorTopY(f);
 
+    noStroke();
+    fill(f % 2 ? COLORS.facadeAlt : COLORS.facade);
+    rect(BUILDING_X, top, BUILDING_W, FLOOR_H);
     if (f > 0) {
       stroke(COLORS.slab);
       strokeWeight(2);
       line(BUILDING_X, top + FLOOR_H, BUILDING_X + BUILDING_W, top + FLOOR_H);
     }
 
-    noStroke();
-    fill(COLORS.muted);
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    text(f + 1, BUILDING_X + 24, top + FLOOR_H / 2);
-
+    drawFloorLabel(f, top);
     drawHallButtons(f, top, elevator);
     drawFloorPassengers(f, top, passengers, selectedId);
   }
 
-  drawCabin(elevator, passengers, selectedId);
+  drawShaft(elevator, passengers, selectedId);
+}
+
+function drawFloorLabel(f, top) {
+  const x = CFG.BUILDING_X + 12;
+  const y = top + CFG.FLOOR_H / 2;
+  noStroke();
+  fill(COLORS.labelBg);
+  rect(x, y - 12, 32, 24, 12);
+  fill(COLORS.label);
+  textAlign(CENTER, CENTER);
+  textSize(13);
+  textStyle(BOLD);
+  text(f + 1, x + 16, y + 1);
+  textStyle(NORMAL);
 }
 
 function drawHallButtons(f, top, elevator) {
   const x = CFG.HALL_BTN_X;
+
+  noStroke();
+  fill(COLORS.plate);
+  rect(x - 15, top + 6, 30, CFG.FLOOR_H - 12, 15);
+
   const buttons = [];
-  if (f < CFG.FLOORS - 1) buttons.push({ dir: DIR.UP, y: top + CFG.FLOOR_H * 0.3 });
-  if (f > 0) buttons.push({ dir: DIR.DOWN, y: top + CFG.FLOOR_H * 0.7 });
+  if (f < CFG.FLOORS - 1) buttons.push({ dir: DIR.UP, y: top + CFG.FLOOR_H * 0.32 });
+  if (f > 0) buttons.push({ dir: DIR.DOWN, y: top + CFG.FLOOR_H * 0.68 });
 
   for (const b of buttons) {
     const lit = elevator.hallCalls[b.dir].has(f);
-    stroke(COLORS.btnBorder);
+    if (lit) shadow(COLORS.litGlow, 12);
+    stroke(lit ? COLORS.lit : COLORS.btnBorder);
     strokeWeight(1.5);
     fill(lit ? COLORS.lit : COLORS.btn);
-    circle(x, b.y, 22);
+    circle(x, b.y, 20);
+    noShadow();
     noStroke();
-    fill(lit ? COLORS.litText : COLORS.text);
-    drawArrow(x, b.y, b.dir, 5);
+    fill(lit ? COLORS.litText : COLORS.icon);
+    drawArrow(x, b.y, b.dir, 4.5);
     addHit({ x, y: b.y, r: 12 }, () => onHallButton(f, b.dir));
   }
 }
 
 function drawFloorPassengers(f, top, passengers, selectedId) {
   const here = passengers.filter(p => p.state !== P_STATE.RIDING && p.floor === f);
-  const y = top + CFG.FLOOR_H / 2 + 4;
+  const y = top + CFG.FLOOR_H / 2;
 
   here.forEach((p, i) => {
     const x = CFG.WAIT_X + i * 34;
     drawPassenger(p, x, y, 12, p.id === selectedId);
     if (p.state === P_STATE.WAITING) {
+      // Значок «ждёт вверх/вниз»
       noStroke();
       fill(COLORS.lit);
-      drawArrow(x + 13, y - 15, p.dir, 4);
+      circle(x + 11, y - 11, 13);
+      fill(COLORS.litText);
+      drawArrow(x + 11, y - 11, p.dir, 3);
     }
   });
 }
 
-function drawCabin(elevator, passengers, selectedId) {
-  const x = CFG.SHAFT_X + 4;
-  const w = CFG.SHAFT_W - 8;
-  const h = CFG.FLOOR_H - 6;
-  const top = floorTopY(elevator.pos) + 3;
+function drawShaft(elevator, passengers, selectedId) {
+  const { SHAFT_X, SHAFT_W, TOP, FLOORS, FLOOR_H } = CFG;
 
-  stroke(COLORS.cabinBorder);
+  noStroke();
+  fill(COLORS.shaft);
+  rect(SHAFT_X, TOP, SHAFT_W, FLOORS * FLOOR_H);
+
+  // Направляющие
+  stroke(COLORS.rail);
   strokeWeight(2);
-  fill(COLORS.cabin);
-  rect(x, top, w, h, 3);
+  line(SHAFT_X + 3, TOP, SHAFT_X + 3, TOP + FLOORS * FLOOR_H);
+  line(SHAFT_X + SHAFT_W - 3, TOP, SHAFT_X + SHAFT_W - 3, TOP + FLOORS * FLOOR_H);
+
+  const top = floorTopY(elevator.pos) + 4;
+
+  // Трос
+  stroke(COLORS.cable);
+  strokeWeight(1.5);
+  line(SHAFT_X + SHAFT_W / 2, TOP, SHAFT_X + SHAFT_W / 2, top);
+
+  drawCabin(elevator, passengers, selectedId, top);
+}
+
+function drawCabin(elevator, passengers, selectedId, top) {
+  const x = CFG.SHAFT_X + 5;
+  const w = CFG.SHAFT_W - 10;
+  const h = CFG.FLOOR_H - 8;
+
+  noStroke();
+  fill(COLORS.cabinFrame);
+  rect(x - 1, top - 1, w + 2, h + 2, 4);
+  fill(COLORS.cabinInside);
+  rect(x + 2, top + 2, w - 4, h - 4, 2);
+  fill(COLORS.cabinLight);
+  rect(x + 10, top + 4, w - 20, 3, 2);
 
   passengers
     .filter(p => p.state === P_STATE.RIDING)
     .forEach((p, i) => {
-      const cx = x + 10 + (i % 4) * 19;
-      const cy = top + 14 + Math.floor(i / 4) * 21;
-      drawPassenger(p, cx, cy, 8, p.id === selectedId);
+      const cx = x + 11 + (i % 4) * 17.5;
+      const cy = top + 17 + Math.floor(i / 4) * 18;
+      drawPassenger(p, cx, cy, 7.5, p.id === selectedId);
     });
 
-  // Двери разъезжаются в стороны, полупрозрачные — чтобы было видно, кто внутри
-  const half = (w / 2) * (1 - elevator.door);
+  // Двери разъезжаются в стороны; полупрозрачные — видно, кто внутри
+  const half = ((w - 4) / 2) * (1 - elevator.door);
+  if (half < 0.5) return;
   noStroke();
   fill(COLORS.door);
-  rect(x, top, half, h);
-  rect(x + w - half, top, half, h);
+  rect(x + 2, top + 2, half, h - 4);
+  rect(x + w - 2 - half, top + 2, half, h - 4);
+  stroke(COLORS.doorLine);
+  strokeWeight(1);
+  line(x + 2 + half, top + 2, x + 2 + half, top + h - 2);
+  line(x + w - 2 - half, top + 2, x + w - 2 - half, top + h - 2);
 }
